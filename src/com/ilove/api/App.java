@@ -55,5 +55,6 @@ public class App extends HttpServlet {
         }
 		out.println("]}");
 		out.close();
+		m.close();
 	}
 }
