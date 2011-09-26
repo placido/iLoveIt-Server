@@ -29,7 +29,7 @@
         	xhr.overrideMimeType("application/json");
     	}
 		})                   
-		$.getJSON('api/photo?'+ new Date().getTime(), function(data) {
+		$.getJSON('api/app/nearby?'+ new Date().getTime(), function(data) {
 			$.each(data.photos,function(i,photo){
 			   var myLatlng = new google.maps.LatLng(photo.location[0], photo.location[1]);
 			   var thumbnailUrl = "http://d1w26viojcn1vr.cloudfront.net/uploads/"+photo._id.$oid+"/small.jpeg";   
@@ -42,7 +42,7 @@
 					dbId: photo._id.$oid
 				});
 			    google.maps.event.addListener(marker, 'click', function(event) {
-				    var url = "http://d1w26viojcn1vr.cloudfront.net/uploads/"+marker.dbId+"/image.jpeg";
+				    var url = "http://d1w26viojcn1vr.cloudfront.net/uploads/"+marker.dbId+"/small.jpeg";
 					window.location = url;
 				});   
 			});

@@ -18,14 +18,14 @@
 	var name = prompt("Please enter a neighbourhood name for this marker","");
 	if (name!=null && name!="") {
 		// HTTP POST the details of this new marker to create it
-		$.post('ajax/marker?name='+name+'&lat='+event.latLng.lat()+'&lng='+event.latLng.lng(), function(data) {
+		$.post('api/cms/marker?name='+name+'&lat='+event.latLng.lat()+'&lng='+event.latLng.lng(), function(data) {
 			addMarker(map, event.latLng, name, data._id.$oid);
 		})
 	}
   }
 
 	function rightClick(event) {
-		$.getJSON('api/near?lat='+event.latLng.lat()+'&lng='+event.latLng.lng(), function(data) {
+		$.getJSON('api/cms/near?lat='+event.latLng.lat()+'&lng='+event.latLng.lng(), function(data) {
 			var myLatlng = new google.maps.LatLng(data.location[0], data.location[1]);
     		var distance = Math.floor(google.maps.geometry.spherical.computeDistanceBetween(event.latLng, myLatlng));
     		if (distance <= 500) {
@@ -79,7 +79,7 @@
 	    // on dragEnd of this marker, HTTP PUT its new position
 		google.maps.event.addListener(marker, 'dragend', function(event) {			  			
   			$.ajax({
-	  			   url: 'ajax/marker?dbId='+marker.dbId+'&name='+marker.title+'&lat='+event.latLng.lat()+'&lng='+event.latLng.lng(),
+	  			   url: 'api/cms/marker?dbId='+marker.dbId+'&name='+marker.title+'&lat='+event.latLng.lat()+'&lng='+event.latLng.lng(),
 	  			   type: 'PUT',
 	  			   success: function( response ) {
 	  			   }
@@ -93,7 +93,7 @@
 			var r = confirm ("Remove "+marker.title+ " marker?");
 			if (r == true) {
 	  			$.ajax({
-	  			   url: 'ajax/marker?dbId='+marker.dbId,
+	  			   url: 'api/cms/marker?dbId='+marker.dbId,
 	  			   type: 'DELETE',
 	  			   success: function( response ) {
 	  			   }
@@ -131,7 +131,7 @@
         	xhr.overrideMimeType("application/json");
     	}
 		})    
-		$.getJSON('ajax/marker?'+ new Date().getTime(), function(data) {
+		$.getJSON('api/cms/marker?'+ new Date().getTime(), function(data) {
 			$.each(data.neighbourhoods,function(i,hood){
 			   var myLatlng = new google.maps.LatLng(hood.location[0], hood.location[1]);
 			   addMarker(map, myLatlng, hood.name, hood._id.$oid);
