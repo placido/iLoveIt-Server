@@ -1,4 +1,4 @@
-package com.ilove.ajax;
+package com.ilove.api.cms;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -12,7 +12,7 @@ import com.mongodb.*;
 /**
  * Servlet implementation class Marker
  */
-@WebServlet("/ajax/marker")
+@WebServlet("/api/cms/marker")
 
 public class Marker extends HttpServlet {
 	private static final long serialVersionUID = 1L;
