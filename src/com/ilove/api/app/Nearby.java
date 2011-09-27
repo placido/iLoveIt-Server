@@ -56,10 +56,16 @@ public class Nearby extends HttpServlet {
 			} catch (Exception argumentException) { }
 			if (limit > 100) limit = 100; // cap the limit in any case
 			
+			// parse user argument
+			String user = null;
+			if ((request.getParameter("user") != null) && (request.getParameter("user").matches("^\\w+$"))) {
+				user = request.getParameter("user");
+			}
+			
 			// Return nearby neighbourhoods
 			DBCollection coll = db.getCollection("hoods");
 			BasicDBObject query = new BasicDBObject("location" , new BasicDBObject( "$near", location));
-			DBCursor cur = coll.find(query);
+			DBCursor cur = coll.find(query).limit(5); // return no more than 5 neighbourhoods
 			if (cur.count() > 0) {
 				out.println("\"hoods\":[");
 		        while(cur.hasNext()) {
@@ -69,9 +75,16 @@ public class Nearby extends HttpServlet {
 				out.println("], ");
 			}
 		
-			// Returns nearby photos
+			// Returns photos
 			coll = db.getCollection("photos");
-			cur = coll.find(query).limit(limit).skip(skip);
+			if (user == null) {
+				// look for paginated photos nearby in (default) distance order
+				cur = coll.find(query).limit(limit).skip(skip);
+			} else {
+				// look for user photos in anti-chronological order
+				query.append("user", user);
+				cur = coll.find(query).sort(new BasicDBObject("ts", -1)).limit(limit).skip(skip);
+			}
 			if (cur.count() > 0) {
 				out.println("\"photos\":[");
 				while(cur.hasNext()) {

@@ -33,35 +33,11 @@ import com.mongodb.Mongo;
 @WebServlet("/api/app/photo")
 public class Photo extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private DB db = null;
-	private Mongo m = null;
+
 	
     public Photo() {
         super();
-    	try {
-    		m = new Mongo( "localhost" , 27017 );
-    		db = m.getDB( "test" );
-    	} catch (Exception e) {
-    		System.out.println("Failed to connect to database: "+e);
-    	}
     }
-    
-    //Create a progress listener (OPTIONAL)
-    ProgressListener progressListener = new ProgressListener() {
-    private long kiloBytes = -1;
-    public void update(long pBytesRead, long pContentLength, int pItems) {
-    	long kBytes = pBytesRead / 1000;
-        if (kiloBytes == kBytes) {
-        	return;
-        }
-        kiloBytes = kBytes;
-        if (pContentLength == -1) {
-         //   System.out.println("So far, " + pBytesRead + " bytes of item "+pItems+" have been read.");
-        } else {
-         //   System.out.println("So far, " + pBytesRead + " of " + pContentLength + " bytes of item "+pItems+" have been read.");
-        }
-      }
-    };	
 
 	// POST: upload a new photo
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -69,31 +45,27 @@ public class Photo extends HttpServlet {
 		int maxMemorySize = 5000000;
 		// TO DO: Set correct max size and tmp folder
 		String tmpDirPath = "C:\\tmp\\ilove\\tmp";
-		
+		PrintWriter out = null;
+		Mongo m = null;
 		response.setContentType("application/json");
-		PrintWriter out = response.getWriter();
-		// Check that we have a file upload request
-		// boolean isMultipart = ServletFileUpload.isMultipartContent(request);
-		// Create a factory for disk-based file items
-		DiskFileItemFactory factory = new DiskFileItemFactory(maxMemorySize, new File(tmpDirPath));
-		// Create a new file upload handler
-		ServletFileUpload upload = new ServletFileUpload(factory);
-		// Set overall request size constraint
-		upload.setSizeMax(maxRequestSize);
-		// BInd the progress listener (optional)
-		upload.setProgressListener(progressListener);
-		
-		// Insert record in DB with timestamp and get the ID
-		Date now = new Date();
-		BasicDBObject time = new BasicDBObject("ts", now);
-		DBCollection coll = db.getCollection("photos");
-		coll.insert(time);
-		ObjectId id = (ObjectId)time.get( "_id" );
-		String dbId = id.toString();
 
-		
-		// Parse the request
 		try {
+			out = response.getWriter();
+		
+			// Insert record in DB with timestamp and get the ID
+			m = new Mongo( "localhost" , 27017 );
+			DB db = m.getDB( "test" );
+			Date now = new Date();
+			BasicDBObject time = new BasicDBObject("ts", now);
+			DBCollection coll = db.getCollection("photos");
+			coll.insert(time);
+			ObjectId id = (ObjectId)time.get( "_id" );
+			String dbId = id.toString();
+
+			// Parse the request
+			DiskFileItemFactory factory = new DiskFileItemFactory(maxMemorySize, new File(tmpDirPath));
+			ServletFileUpload upload = new ServletFileUpload(factory);
+			upload.setSizeMax(maxRequestSize);
 			List items = upload.parseRequest(request);
 			// Process the uploaded items
 			Iterator iter = items.iterator();
@@ -159,12 +131,16 @@ public class Photo extends HttpServlet {
 			coll.update(docToUpdate, docUpdate);
 		    out.println(docUpdate.toString());
 
-		} catch (FileUploadException e) {
-			// TO DO: handle file size exception
-			// TO DO: remove from database the photos record placeholder with timestamp
-			e.printStackTrace();
 		} catch (Exception e) {
-			e.printStackTrace();
+			// TO DO: remove from database the photos record placeholder with timestamp
+			// TO DO: remove from S3
+			out.println("{ \"error\": \""+e+"\" }");
+			
+		} finally {
+			if (out != null) {
+				out.close();
+			}
+			if (m != null) m.close();
 		}
 	}
 
