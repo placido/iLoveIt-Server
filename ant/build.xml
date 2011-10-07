@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ilove" default="build" basedir="..">
+	<path id="build.classpath">		
+	  <!-- load Tomcat jars -->	
+	  <fileset dir="/Applications/apache-tomcat-7.0.19">
+	     <include name="lib/*.jar"/>
+	  </fileset>
+	  <!-- Load Webapp jars -->
+	  <fileset dir=".">
+	     <include name="WebContent/WEB-INF/lib/*.jar"/>
+	  </fileset>
+	</path>
+
+	<target name="build">
+		<property name="wardestfile" value="ant/wars/ilove-remote.war"/>
+	    <property name="deploymentconfig" value="WebContent/WEB-INF/web-remote.xml"/>
+		<delete dir="ant/build"/>
+		<mkdir dir="ant/build/classes" />
+		<mkdir dir="ant/wars" />
+        <javac debug="true" destdir="ant/build/classes" srcdir="src" classpathref="build.classpath" />
+		<war destfile="${wardestfile}" webxml="${deploymentconfig}">
+		  <fileset dir="WebContent"/>
+		  <classes dir="build/classes"/>
+		</war>
+		<echo message="Success! Used deployment configuration at ${deploymentconfig}"/>
+		<echo message="to create WAR file at ${basedir}/${wardestfile}"/>
+	</target>	
+</project>
