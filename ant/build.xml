@@ -12,8 +12,8 @@
 	</path>
 
 	<target name="build">
-		<property name="wardestfile" value="ant/wars/ilove-remote.war"/>
-	    <property name="deploymentconfig" value="WebContent/WEB-INF/web-remote.xml"/>
+		<property name="wardestfile" value="ant/wars/ilove.war"/>
+	    <property name="deploymentconfig" value="WebContent/WEB-INF/web-live.xml"/>
 		<delete dir="ant/build"/>
 		<mkdir dir="ant/build/classes" />
 		<mkdir dir="ant/wars" />
